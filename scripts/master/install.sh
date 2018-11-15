@@ -291,6 +291,9 @@ function saltstack_configure () {
 			# Maak de /srv/salt map aan.
 			mkdir -p /srv/salt > /dev/null 2>&1
 			
+			# En daarin een scripts map.
+			mkdir -p /srv/salt/script > /dev/null 2>&1
+			
 			# Restart de saltmaster nu.
 			pkill salt-master > /dev/null 2>&1
 			salt-master -d > /dev/null 2>&1
@@ -543,10 +546,15 @@ function git_fetch () {
 	# Clone de repository naar de /home/repository map.
 	git clone https://github.com/rwolthuis/SchoolLinux.git /home/repository > /dev/null 2>&1
 	
+	# Kopieer de install script naar de saltstack fileserver.
+	cp /home/repository/scripts/minion/install_docker_kubernetes.sh /srv/salt/script/install_docker_kubernetes.sh
+	
+	# Kopieer de init state naar de saltstack fileserver.
+	cp /home/repository/salt/InitState.sls /srv/salt/InitState.sls
+	
 	# Geef success.
 	status_msg_complete
 }
-
 
 
 
@@ -648,9 +656,6 @@ function install_master_server () {
 	git_fetch
 	
 	
-	
-	echo "Owja, en die join shit is:"
-	echo ${KUBE_JOIN}
 	
 	# Een laatste new-line.
 	echo ""
@@ -754,7 +759,4 @@ function menu_show_ip () {
 
 # Roep de menu_show functie aan.
 menu_show
-
-
-
 

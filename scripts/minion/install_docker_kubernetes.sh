@@ -8,9 +8,6 @@
 PREREQUISITES=('curl' 'apt-transport-https' 'ca-certificates' 'gnupg2' 'software-properties-common' 'git')
 
 
-# Het plekje waar de join string van kubernetes in wordt opgeslagen.
-KUBE_JOIN=''
-
 
 # Functie om een array te joinen.
 # Bron: https://zaiste.net/how_to_join_elements_of_an_array_in_bash/
@@ -184,8 +181,14 @@ function kubernetes_configure () {
 	# Schakel swap nu uit.
 	$(swapoff -a) > /dev/null 2>&1
 	
+	# Defineer de kubenetus variables.
+	KUBERNETES_MASTER_IP=$(cat /etc/salt/minion.d/99-master-address.conf | cut -d: -f 2)
+	KUBERNETES_MASTER_PORT=6443
+	KUBERNETES_JOIN_TOKEN=''
+	KUBERNETES_JOIN_SHA256=''
+	
 	# Join de kubernetes master.
-	kubeadm join 10.0.2.100:6443 --token #KUBERNETES-JOIN-TOKEN# --discovery-token-ca-cert-hash sha256:#KUBERNETES-JOIN-SHA256#
+	kubeadm join ${KUBERNETES_MASTER_IP}:${KUBERNETES_MASTER_PORT} --token ${KUBERNETES_JOIN_TOKEN} --discovery-token-ca-cert-hash sha256:${KUBERNETES_JOIN_SHA256}
 }
 
 
