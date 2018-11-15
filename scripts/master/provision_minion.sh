@@ -104,6 +104,8 @@ function provision_minion () {
 
 
 
+
+
 # Functie om de banner te laten zien
 function banner_show () {
 
@@ -116,8 +118,49 @@ function banner_show () {
 
 
 
+# Functie om het menu te laten zien.
+function menu_show () {
+
+	# Leeg de console.
+	clear
+
+	# Laat de banner zien.
+	banner_show
+	
+	# Maak een banner aan.
+	echo "1) Alle salt minions accepteren & provisionen"
+	echo "2) Alleen minions provisionen"
+	echo "3) Sluit het script af"
+	echo ""
+	
+	# Vraag om een input van de gebruiker dat bestaat uit 1 char, en niet weiger backslashes.
+	read -n1 -r -p "Kies een optie [1 - 3]: " optie
+	
+	# Case de optie.
+	case $optie in
+		1) provision_minion "accept" ;;							# Provision minions en alle salt minions accepteren.
+		2) provision_minion ;;									# Provision minions zonder salt minions te accepteren.
+		2) echo "" && exit 0;;									# Er is gekozen om het script af te sluiten.
+		*) echo -e "Onbekende optie." && sleep 2 && menu_show	# Er is geen 1, 2 of 3 ingevuld. Echo een foutmelding, wacht 2 seconde en laat het menu opnieuw zien.
+	esac
+}
+
+
 
 
 # Roep de provision_minion functie aan.
-provision_minion
+#provision_minion
+
+
+function functest () {
+
+	if [ $# -eq 0 ]; then
+		echo "No arguments supplied"
+	else
+		echo "${$#} arguments supplied"
+	fi
+}
+
+
+functest
 

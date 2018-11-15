@@ -686,12 +686,17 @@ function install_master_server () {
 	# Installeer php
 	php_install
 	
+	
+	# chmod provision_minion.sh zodat die direct gerunt kan worden.
+	chmod +x /home/repository/scripts/master/provision_minion.sh > /dev/null
+	
+	
 	# New line
 	echo ""
 	
 	# Uitleg.
 	echo "Accepteer de salt minions met salt-key -A, en run vervolgens het provisioning script:"
-	echo "	/home/repository/master/provision_minion.sh"
+	echo "	/home/repository/scripts/master/provision_minion.sh"
 	
 	# Een laatste new-line.
 	echo ""
