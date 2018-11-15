@@ -503,6 +503,34 @@ function kubernetes_configure () {
 
 
 
+# Functie om Wordpress te installeren in kubernetes.
+function kubernetes_wordpress () {
+
+	# Geef bericht weer.
+	status_msg_show "Wordpress pod aanmaken in Kubernetes."
+	
+	# Maak een MysQL password aan.
+	kubectl create secret generic mysql-pass --from-literal=password=P@$$w0rd > /dev/null 2>&1
+	
+	# Maak de PV mappen aan.
+	mkdir -p /var/lib/pv1 /var/lib/pv2 > /dev/null 2>&1
+	
+	# Maak een de PV aan.
+	kubectl create -f /home/repository/kubernetes/pv.yaml > /dev/null 2>&1
+	
+	# Deploy MySQL.
+	kubectl create -f /home/repository/kubernetes/mysql-deployment.yaml > /dev/null 2>&1
+	
+	# En deploy wordpress.
+	kubectl create -f /home/repository/kubernetes/wordpress-deployment.yaml --validate=false > /dev/null 2>&1
+	
+	# Geef een OK.
+	status_msg_complete	
+}
+
+
+
+
 # Functie om apache te installeren
 function apache_install () {
 
@@ -631,6 +659,10 @@ function install_master_server () {
 	docker_validate
 	
 	
+	# Haal de files uit de git repository.
+	git_fetch	
+	
+	
 	# Fetch kubernetes
 	kubernetes_fetch
 	
@@ -643,6 +675,9 @@ function install_master_server () {
 	# Configureer kubernetes
 	kubernetes_configure
 	
+	# Installeer wordpress in kubernetes.
+	kubernetes_wordpress
+	
 	
 	# Installeer Apache
 	apache_install
@@ -650,10 +685,6 @@ function install_master_server () {
 	
 	# Installeer php
 	php_install
-	
-	
-	# Haal de files uit de git repository.
-	git_fetch
 	
 	
 	
