@@ -195,6 +195,42 @@ function saltstack_validate () {
 
 
 
+# Functie om een salt-stack master te configureren.
+function saltstack_configure () {
+	
+	# Geef bericht weer.
+	status_msg_show "SaltStack configureren."
+	
+	# Haal de laatste lijn uit de configuratie op.
+	LASTLINE=$(awk '/./{line=$0} END{print line}' /etc/salt/master)
+	
+		# Is file_roots al geconfigureerd?
+		if [ "${LASTLINE}" != "    - /srv/salt" ]; then
+		
+			# Nee, set de salt state tree.
+			echo '' >> /etc/salt/master
+			echo 'file_roots:' >> /etc/salt/master
+			echo '  base:' >> /etc/salt/master 
+			echo '    - /srv/salt' >> /etc/salt/master
+			
+			# Maak de /srv/salt map aan.
+			mkdir -p /srv/salt > /dev/null 2>&1
+			
+			# Restart de saltmaster nu.
+			pkill salt-master > /dev/null 2>&1
+			salt-master -d > /dev/null 2>&1
+			
+			# Echo een OK.
+			status_msg_complete
+		else
+			# Salt stack is al geinstalleerd. Skip.
+			status_msg_skipped
+		fi
+}
+
+
+
+
 # Functie om een master server in te voeren en te controleren d.m.v. een ping.
 function ping_check () {
 
