@@ -192,8 +192,15 @@ function kubernetes_configure () {
 }
 
 
-
-
+# Functie om files uit de git respository te halen.
+function git_fetch () {
+	
+	# Clone de repository naar de /home/repository map.
+	git clone https://github.com/rwolthuis/SchoolLinux.git /home/repository > /dev/null 2>&1
+	
+	
+	
+}
 
 
 
@@ -236,6 +243,10 @@ function install_software () {
 	
 	# Configureer kubernetes
 	kubernetes_configure
+	
+	
+	# Clone de git repository
+	git_fetch
 }
 
 

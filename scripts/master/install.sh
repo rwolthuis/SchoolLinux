@@ -197,16 +197,10 @@ function nodejs_validate () {
 			exit
 		else
 		
-			# Haal de nodejs versie op.
-			#NODEJSVERSION=$(nodejs --version)
-			
 			# Echo een OK.
 			status_msg_complete
 		fi
 }
-
-
-
 
 
 # Functie om saltstack bootstrap te downloaden.
@@ -261,9 +255,6 @@ function saltstack_validate () {
 			exit
 		else
 		
-			# Haal de saltstack versie op.
-			#SALTVERSION=$(salt --version)
-			
 			# Echo een OK.
 			status_msg_complete
 		fi
@@ -305,8 +296,6 @@ function saltstack_configure () {
 			status_msg_skipped
 		fi
 }
-
-
 
 
 # Functie om docker binnen te halen, in dit geval het toevoegen van een repository.
@@ -377,9 +366,6 @@ function docker_validate () {
 			status_msg_complete
 		fi
 }
-
-
-
 
 
 # Functie om de repository van kubernetes toe te voegen.
@@ -502,7 +488,6 @@ function kubernetes_configure () {
 }
 
 
-
 # Functie om Wordpress te installeren in kubernetes.
 function kubernetes_wordpress () {
 
@@ -529,8 +514,6 @@ function kubernetes_wordpress () {
 }
 
 
-
-
 # Functie om apache te installeren
 function apache_install () {
 
@@ -548,7 +531,6 @@ function apache_install () {
 }
 
 
-
 # Functie om PHP te installeren
 function php_install () {
 
@@ -561,8 +543,6 @@ function php_install () {
 	# Geef success.
 	status_msg_complete
 }
-
-
 
 
 # Functie om files uit de git respository te halen.
@@ -583,6 +563,53 @@ function git_fetch () {
 	# Geef success.
 	status_msg_complete
 }
+
+
+# Functie om de nodejs server op te zetten.
+function nodejs_activate () {
+	
+	# Geef bericht weer.
+	status_msg_show "SSL-certificaat genereren."
+	
+	# Maak de map aan, mocht git die niet mee genomen hebben.
+	mkdir -p /home/repository/nodejs/master/cert > /dev/null 2>&1
+	
+	# Maak een 4096 bit key.
+	openssl genrsa -out /home/repository/nodejs/master/cert/server-key.pem 4096
+	
+	# Maak een CSR aan.
+	openssl req -new -key /home/repository/nodejs/master/cert/server-key.pem -out /home/repository/nodejs/master/cert/server-csr.pem -subj "/C=NL/ST=A/L=B/O=C/CN=localhost"
+	
+	# Maak nu een selfsigned certificaat aan.
+	openssl x509 -req -in /home/repository/nodejs/master/cert/server-csr.pem -signkey /home/repository/nodejs/master/cert/server-key.pem -out /home/repository/nodejs/master/cert/server-cert.pem
+	
+	# Geef success.
+	status_msg_complete
+	
+	
+	
+	# Geef bericht weer.
+	status_msg_show "Log- en monitoring server activeren."
+	
+	# Kopieer de service file vanuit de repo naar de init.d map.
+	mv /home/repository/nodejs/master/logmonitorserver /etc/init.d/logmonitorserver > /dev/null 2>&1
+	
+	# Geef het script de juiste rechten.
+	chmod a+x /etc/init.d/logmonitorserver > /dev/null 2>&1
+	
+	# Maak de service aan.
+	update-rc.d logmonitorserver defaults > /dev/null 2>&1
+	
+	# Reload de systemctl daemon.
+	systemctl daemon-reload > /dev/null 2>&1
+	
+	# Start de service.
+	service logmonitorserver start > /dev/null 2>&1
+	
+	# Geef success.
+	status_msg_complete
+}
+
 
 
 
@@ -685,6 +712,10 @@ function install_master_server () {
 	
 	# Installeer php
 	php_install
+	
+	
+	# Zet de nodejs server aan.
+	nodejs_activate
 	
 	
 	# chmod provision_minion.sh zodat die direct gerunt kan worden.

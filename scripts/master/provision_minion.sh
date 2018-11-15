@@ -61,6 +61,21 @@ function provision_minion () {
 	echo "De provisioning van minions is gestart."
 	echo ""
 	
+	
+		# Is er een argument mee gegeven aan de functie, wat indiceert dat salt minions geaccept moeten worden.
+		if [ $# -gt 0 ]; then
+		
+			# Ja, er zijn meer dan 0 argumenten mee gegeven. Log.
+			status_msg_show "Alle salt minions accepteren."
+			
+			# Accepteer alle minions.
+			salt-key -y -A
+			
+			# Geef success.
+			status_msg_complete
+		else	
+	
+	
 	# Log.
 	status_msg_show "Genereren van Kubenetes join token."
 	
@@ -147,20 +162,6 @@ function menu_show () {
 
 
 
-
-# Roep de provision_minion functie aan.
-#provision_minion
-
-
-function functest () {
-
-	if [ $# -eq 0 ]; then
-		echo "No arguments supplied"
-	else
-		echo "${$#} arguments supplied"
-	fi
-}
-
-
-functest
+# Roep de menu_show functie aan.
+menu_show
 

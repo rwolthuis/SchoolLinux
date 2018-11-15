@@ -1,0 +1,23 @@
+#!/bin/sh
+
+export PATH=$PATH:/usr/local/bin
+export NODE_PATH=$NODE_PATH:/usr/local/lib/node_modules
+
+case "$1" in
+	start)
+	forever --sourceDir=/home/repository/nodejs/master -p /home/repository/nodejs/master/pid start index.js
+	;;
+	
+	restart)
+	uid=$(forever list | grep run.js | cut -c24-27)
+	forever stop $uid
+	forever --sourceDir=/home/repository/nodejs/master -p /home/repository/nodejs/master/pid start index.js
+	;;
+
+	stop)
+	uid=$(forever list | grep run.js | cut -c24-27)
+	forever stop $uid
+	;;
+esac
+
+exit 0
