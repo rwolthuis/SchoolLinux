@@ -73,7 +73,7 @@ function provision_minion () {
 			
 			# Geef success.
 			status_msg_complete
-		else	
+		fi	
 	
 	
 	# Log.
