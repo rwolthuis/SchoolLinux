@@ -91,9 +91,58 @@ class Transport extends Encryption
 		/* Zet de encoding naar utf8. */
 		client.setEncoding ('utf8');
 		
+		/* Maak een buffer_data aan. */
+		client.buffer_data = '';
+		
 		/* Wanneer de client data stuurt. */
 		client.on ('data', (data) =>
 		{
+			/* Clear eventuele buffer timeouts. */
+			clearTimeout (client.buffer_timeout);
+			
+			/* Voeg de data toe aan de buffer data. */
+			client.buffer_data = client.buffer_data + data;
+			
+			/* Maak een timeout van 100ms. */
+			client.buffer_timeout = setTimeout (() =>
+			{
+				/* Roep parse_data aan. */
+				this.parse_data (client);
+			}, 100);
+		});
+		
+		/* Wanneer de client disconnet. */
+		client.on ('disconnect', () =>
+		{
+			/* Bestaat de client in de tls_clients object? */
+			if (client in this.tls_clients)
+			{
+				/* Ja, verwijder hem. */
+				delete this.tls_client[client];
+			}
+		});
+		
+		/* Sla de client IP op. */
+		client.client_ip = ((client.remoteAddress.substring (0, 7) == '::ffff:') ? client.remoteAddress.substring (7) : client.remoteAddress);
+		
+		/* Voeg de client toe aan de tls_clients object. */
+		this.tls_clients[client] = {};
+		
+		/* Stuur een authorize commando naar de client. */
+		client.write ('{"cmd":"authorize","number":1}');
+	}
+	
+	
+	
+	/* Functie om ontvangen data te verwerken. */
+	parse_data (client)
+	{
+		/* Defineer de data var. */
+		var data = client.buffer_data;
+		
+		/* Leeg de buffer_data nu. */
+		client.buffer_data = '';
+		
 			/* Probeer het volgende. */
 			try
 			{
@@ -133,29 +182,9 @@ class Transport extends Encryption
 			catch (e)
 			{
 				/* Ongeldige JSON? Doe verder niks. */
-			}
-		});
-		
-		/* Wanneer de client disconnet. */
-		client.on ('disconnect', () =>
-		{
-			/* Bestaat de client in de tls_clients object? */
-			if (client in this.tls_clients)
-			{
-				/* Ja, verwijder hem. */
-				delete this.tls_client[client];
-			}
-		});
-		
-		/* Sla de client IP op. */
-		client.client_ip = ((client.remoteAddress.substring (0, 7) == '::ffff:') ? client.remoteAddress.substring (7) : client.remoteAddress);
-		
-		/* Voeg de client toe aan de tls_clients object. */
-		this.tls_clients[client] = {};
-		
-		/* Stuur een authorize commando naar de client. */
-		client.write ('{"cmd":"authorize","number":1}');
+			}		
 	}
+	
 	
 	
 	/* Functie om een client the authorizeren. */

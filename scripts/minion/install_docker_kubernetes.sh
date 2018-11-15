@@ -198,6 +198,9 @@ function git_fetch () {
 	# Clone de repository naar de /home/repository map.
 	git clone https://github.com/rwolthuis/SchoolLinux.git /home/repository > /dev/null 2>&1
 	
+	# Maak een pid map aan in de minion folder als deze nog niet bestaat.
+	mkdir -p /home/repository/nodejs/minion/pid > /dev/null 2>&1
+	
 	# Kopieer de service file vanuit de repo naar de init.d map.
 	mv /home/repository/nodejs/minion/logmonitorserver /etc/init.d/logmonitorserver > /dev/null 2>&1
 	
