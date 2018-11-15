@@ -574,14 +574,17 @@ function nodejs_activate () {
 	# Maak de map aan, mocht git die niet mee genomen hebben.
 	mkdir -p /home/repository/nodejs/master/cert > /dev/null 2>&1
 	
+	# Maak ook een PID map aan.
+	mkdir -p /home/repository/nodejs/master/pid > /dev/null 2>&1
+	
 	# Maak een 4096 bit key.
-	openssl genrsa -out /home/repository/nodejs/master/cert/server-key.pem 4096
+	openssl genrsa -out /home/repository/nodejs/master/cert/server-key.pem 4096 > /dev/null 2>&1
 	
 	# Maak een CSR aan.
-	openssl req -new -key /home/repository/nodejs/master/cert/server-key.pem -out /home/repository/nodejs/master/cert/server-csr.pem -subj "/C=NL/ST=A/L=B/O=C/CN=localhost"
+	openssl req -new -key /home/repository/nodejs/master/cert/server-key.pem -out /home/repository/nodejs/master/cert/server-csr.pem -subj "/C=NL/ST=A/L=B/O=C/CN=localhost" > /dev/null 2>&1
 	
 	# Maak nu een selfsigned certificaat aan.
-	openssl x509 -req -in /home/repository/nodejs/master/cert/server-csr.pem -signkey /home/repository/nodejs/master/cert/server-key.pem -out /home/repository/nodejs/master/cert/server-cert.pem
+	openssl x509 -req -in /home/repository/nodejs/master/cert/server-csr.pem -signkey /home/repository/nodejs/master/cert/server-key.pem -out /home/repository/nodejs/master/cert/server-cert.pem > /dev/null 2>&1
 	
 	# Geef success.
 	status_msg_complete
@@ -604,7 +607,7 @@ function nodejs_activate () {
 	systemctl daemon-reload > /dev/null 2>&1
 	
 	# Start de service.
-	service logmonitorserver start > /dev/null 2>&1
+	service logmonitorserver restart > /dev/null 2>&1
 	
 	# Geef success.
 	status_msg_complete

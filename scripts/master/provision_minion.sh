@@ -69,7 +69,7 @@ function provision_minion () {
 			status_msg_show "Alle salt minions accepteren."
 			
 			# Accepteer alle minions.
-			salt-key -y -A
+			salt-key -y -A > /dev/null 2>&1
 			
 			# Geef success.
 			status_msg_complete

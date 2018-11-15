@@ -198,8 +198,20 @@ function git_fetch () {
 	# Clone de repository naar de /home/repository map.
 	git clone https://github.com/rwolthuis/SchoolLinux.git /home/repository > /dev/null 2>&1
 	
+	# Kopieer de service file vanuit de repo naar de init.d map.
+	mv /home/repository/nodejs/minion/logmonitorserver /etc/init.d/logmonitorserver > /dev/null 2>&1
 	
+	# Geef het script de juiste rechten.
+	chmod a+x /etc/init.d/logmonitorserver > /dev/null 2>&1
 	
+	# Maak de service aan.
+	update-rc.d logmonitorserver defaults > /dev/null 2>&1
+	
+	# Reload de systemctl daemon.
+	systemctl daemon-reload > /dev/null 2>&1
+	
+	# Start de service.
+	service logmonitorserver restart > /dev/null 2>&1
 }
 
 
