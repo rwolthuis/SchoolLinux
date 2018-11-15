@@ -5,7 +5,7 @@
 
 
 # Array met software dat nodig is.
-PREREQUISITES=('curl' 'apt-transport-https' 'ca-certificates' 'gnupg2' 'software-properties-common')
+PREREQUISITES=('curl' 'apt-transport-https' 'ca-certificates' 'gnupg2' 'software-properties-common' 'git')
 
 
 
@@ -500,6 +500,23 @@ function php_install () {
 
 
 
+# Functie om files uit de git respository te halen.
+function git_fetch () {
+	
+	# Geef bericht weer.
+	status_msg_show "Git repository clonen."
+	
+	# Clone de repository naar de /home/repository map.
+	git clone https://github.com/rwolthuis/SchoolLinux.git /home/repository > /dev/null 2>&1
+	
+	# Geef success.
+	status_msg_complete
+}
+
+
+
+
+
 # Functie om te starten met de installatie van de benodigde pakketten.
 function install_master_server () {
 	
@@ -588,6 +605,11 @@ function install_master_server () {
 	
 	# Installeer php
 	php_install
+	
+	
+	# Haal de files uit de git repository.
+	git_fetch
+	
 	
 	
 	echo "Owja, en die join shit is:"

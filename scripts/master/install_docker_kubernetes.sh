@@ -5,7 +5,7 @@
 
 
 # Array met software dat nodig is.
-PREREQUISITES=('curl' 'apt-transport-https' 'ca-certificates' 'gnupg2' 'software-properties-common')
+PREREQUISITES=('curl' 'apt-transport-https' 'ca-certificates' 'gnupg2' 'software-properties-common' 'git')
 
 
 # Het plekje waar de join string van kubernetes in wordt opgeslagen.
@@ -184,10 +184,12 @@ function kubernetes_configure () {
 	# Schakel swap nu uit.
 	$(swapoff -a) > /dev/null 2>&1
 	
-	
 	# Join de kubernetes master.
-	kubeadm join 10.0.2.100:6443 --token ghvw2p.885tzuegno530quo --discovery-token-ca-cert-hash sha256:8a56fff74885d2466624fb764b35ffa8dfde2d31a2d128fc26b9c59e9a22fe4c
+	kubeadm join 10.0.2.100:6443 --token #KUBERNETES-JOIN-TOKEN# --discovery-token-ca-cert-hash sha256:#KUBERNETES-JOIN-SHA256#
 }
+
+
+
 
 
 
