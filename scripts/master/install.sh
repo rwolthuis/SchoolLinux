@@ -311,7 +311,7 @@ function docker_fetch () {
 	apt-key add /tmp/docker_gpg > /dev/null 2>&1
 	
 	# Voeg de repository toe.
-	add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+	add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /dev/null 2>&1
 	
 	# En doe als laatste een apt-get update, zodat de packages van de nieuwe respository worden toegevoegd.
 	apt-get update > /dev/null 2>&1
