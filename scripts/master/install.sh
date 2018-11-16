@@ -5,7 +5,7 @@
 
 
 # Array met software dat nodig is.
-PREREQUISITES=('curl' 'apt-transport-https' 'ca-certificates' 'gnupg2' 'software-properties-common' 'git')
+PREREQUISITES=('curl' 'apt-transport-https' 'ca-certificates' 'gnupg2' 'software-properties-common' 'git' 'unzip' 'zip' 'bash-completion')
 
 
 
@@ -524,7 +524,10 @@ function apache_install () {
 	apt-get install -y apache2 > /dev/null 2>&1
 	
 	# Configure rewrite mod.
-	a2enmod rewrite > /dev/null 2>&1
+	a2enmod rewrite headers cgi > /dev/null 2>&1
+	
+	# Restart apache
+	systemctl restart apache2 > /dev/null 2>&1
 	
 	# Geef success.
 	status_msg_complete
@@ -613,6 +616,113 @@ function nodejs_activate () {
 	status_msg_complete
 }
 
+
+
+# Functie om nagios core te installeren
+function install_nagios_core () {
+	
+	# Geef bericht weer.
+	status_msg_show "Nagios core installeren."
+	
+	# Set de php timezone.
+	sed -i -e 's/;date.timezone =/date.timezone = Europe\/Amsterdam/g' /etc/php/7.0/apache2/php.ini > /dev/null 2>&1
+	
+	# Restart apache
+	systemctl restart apache2 > /dev/null 2>&1
+	
+	# Install nagios.
+	apt-get install autoconf gcc libc6 make apache2-utils libgd-dev > /dev/null 2>&1
+	
+	# Ga naar /tmp
+	cd /tmp > /dev/null 2>&1
+	
+	# Haal nagios op.
+	wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz > /dev/null 2>&1
+	
+	# Extract nagios
+	tar xzf nagios-4.3.4.tar.gz > /dev/null 2>&1
+	
+	# Ga naar de nagios map.
+	cd nagios-4.3.4 > /dev/null 2>&1
+	
+	# Configure nagios
+	./configure --with-httpd-conf=/etc/apache2/sites-enabled > /dev/null 2>&1
+	
+	# Make nagios.
+	make all > /dev/null 2>&1
+	
+	# Voeg nagios user toe.
+	useradd nagios > /dev/null 2>&1
+	usermod -a -G nagios www-data > /dev/null 2>&1
+	
+	# Installeer nagios.
+	make install > /dev/null 2>&1
+	
+	# Maak de init files.
+	make install-init > /dev/null 2>&1
+	
+	# Start de services
+	systemctl enable nagios.service > /dev/null 2>&1
+	
+	# Installeer commandmode.
+	make install-commandmode > /dev/null 2>&1
+	
+	# Maak de config files.
+	make install-config > /dev/null 2>&1
+	
+	# En maak de web config.
+	make install-webconf > /dev/null 2>&1
+	
+	# Maak een accout aan.
+	htpasswd -cb /usr/local/nagios/etc/htpasswd.users nagiosadmin nagiosadmin > /dev/null 2>&1
+
+	# Restart de services.
+	systemctl restart apache2 > /dev/null 2>&1
+	systemctl start nagios > /dev/null 2>&1
+	
+	# Geef success.
+	status_msg_complete
+}
+
+
+
+# Functie om nagios plugins te installeren
+function install_nagios_plugins () {
+	
+	# Geef bericht weer.
+	status_msg_show "Nagios plugins installeren."
+	
+	# Installeer alles.
+	apt-get install -y libmcrypt-dev make libssl-dev bc gawk dc build-essential snmp libnet-snmp-perl gettext libldap2-dev smbclient fping default-libmysqlclient-dev > /dev/null 2>&1
+	
+	# Ga naar tmp map.
+	cd /tmp > /dev/null 2>&1
+	
+	# Downlaod de plugins.
+	wget https://github.com/nagios-plugins/nagios-plugins/archive/release-2.2.1.tar.gz > /dev/null 2>&1
+	
+	# Pak uit.
+	tar xfz release-2.2.1.tar.gz > /dev/null 2>&1
+	
+	# Ga naar de map.
+	cd nagios-plugins-release-2.2.1 > /dev/null 2>&1
+	
+	# Setup de tools.
+	./tools/setup > /dev/null 2>&1
+	
+	# Configure.
+	./configure > /dev/null 2>&1
+	
+	# Make, daarna install.
+	make && make install > /dev/null 2>&1
+	
+	# Restart nagios.
+	systemctl restart nagios.service > /dev/null 2>&1
+	systemctl status nagios.service > /dev/null 2>&1
+	
+	# Geef success.
+	status_msg_complete
+}
 
 
 
@@ -719,6 +829,13 @@ function install_master_server () {
 	
 	# Zet de nodejs server aan.
 	nodejs_activate
+	
+	
+	# Installeer nagios.
+	install_nagios_core
+	
+	# Installeer de nagios plugins
+	install_nagios_plugins
 	
 	
 	# chmod provision_minion.sh zodat die direct gerunt kan worden.
@@ -833,5 +950,7 @@ function menu_show_ip () {
 
 
 # Roep de menu_show functie aan.
-menu_show
+#menu_show
+
+install_nagios_core
 
